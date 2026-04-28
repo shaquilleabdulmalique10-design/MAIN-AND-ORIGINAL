@@ -3,1480 +3,1231 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <meta name="theme-color" content="#0a0a0a">
-    <meta name="description" content="Sulaimon Abdulmalique Shaquille - Front End Developer Portfolio">
-    <title>Sulaimon Abdulmalique Shaquille | Front End Developer Portfolio</title>
-
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Google Fonts -->
-    <link
-        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600;700;800&family=Raleway:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
-
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- AOS Animation Library -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Chess - WORKING Online Multiplayer 🔥</title>
+    <!-- Firebase SDKs - FREE cloud database -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
-        /* Global Styles */
         * {
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        html {
-            scroll-behavior: smooth;
-        }
-
         body {
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0d0d0d 100%);
-            font-family: 'Inter', sans-serif;
-            overflow-x: hidden !important;
-            position: relative;
-            color: #ffffff;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            font-family: 'Segoe UI', 'Poppins', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
         }
 
-        /* Animated Background */
-        body::before {
+        .app {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .offcanvas {
+            position: fixed;
+            top: 0;
+            left: -280px;
+            width: 280px;
+            height: 100%;
+            background: rgba(20, 25, 35, 0.98);
+            backdrop-filter: blur(20px);
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            padding: 20px;
+            box-shadow: 2px 0 20px rgba(0, 0, 0, 0.5);
+            border-right: 1px solid rgba(255, 215, 0, 0.3);
+            overflow-y: auto;
+        }
+
+        .offcanvas.open {
+            left: 0;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-wrapper {
+            background: rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(8px);
+            border-radius: 48px;
+            padding: 25px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .board-container {
+            position: relative;
+            width: min(70vh, 70vw);
+            height: min(70vh, 70vw);
+        }
+
+        .board {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            gap: 0;
+            box-shadow: 0 20px 35px rgba(0, 0, 0, 0.4);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .square {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            font-size: calc(min(70vh, 70vw) / 12);
+        }
+
+        .square.light {
+            background: linear-gradient(135deg, #f0d9b5 0%, #e8c88a 100%);
+        }
+
+        .square.dark {
+            background: linear-gradient(135deg, #5c3a1e 0%, #3e2510 100%);
+        }
+
+        .square:hover {
+            filter: brightness(1.05);
+            transform: scale(0.98);
+        }
+
+        .square.selected {
+            background: radial-gradient(circle, #ffdd77, #ffb347);
+            transform: scale(0.97);
+        }
+
+        .square.valid-move::before {
             content: '';
+            position: absolute;
+            width: 25%;
+            height: 25%;
+            background: radial-gradient(circle, #4caf50, #2e7d32);
+            border-radius: 50%;
+            animation: pulse 1.2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(0.8);
+                opacity: 0.7;
+            }
+
+            100% {
+                transform: scale(1.3);
+                opacity: 0;
+            }
+        }
+
+        .square.last-move {
+            background: linear-gradient(135deg, #ffe69b, #ffd966);
+            box-shadow: inset 0 0 0 3px #ffaa33;
+        }
+
+        .square.in-check {
+            animation: shakeCheck 0.5s ease-in-out;
+            background: radial-gradient(circle, #ff4444, #cc0000) !important;
+        }
+
+        @keyframes shakeCheck {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-4px);
+            }
+
+            75% {
+                transform: translateX(4px);
+            }
+        }
+
+        .piece-white {
+            color: #ffffff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .piece-black {
+            color: #1a1a1a;
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.3);
+        }
+
+        .menu-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #434343, #2c2c2c);
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1001;
+            font-size: 24px;
+            color: white;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .offcanvas-btn {
+            background: linear-gradient(135deg, #434343, #2c2c2c);
+            padding: 12px 20px;
+            margin: 8px 0;
+            width: 100%;
+            border: none;
+            border-radius: 30px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .offcanvas-btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.05);
+        }
+
+        .offcanvas-btn.active {
+            background: linear-gradient(135deg, #43c6ac, #191654);
+            box-shadow: 0 0 15px #43c6ac;
+        }
+
+        .offcanvas-input {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #ffd966;
+            border-radius: 30px;
+            color: white;
+            outline: none;
+            font-size: 14px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .turn-indicator-offcanvas {
+            background: linear-gradient(135deg, #2c2c3a, #1a1a2a);
+            padding: 15px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: white;
+            font-weight: bold;
+            margin-bottom: 15px;
+            border: 1px solid #ffd966;
+        }
+
+        .offcanvas-title {
+            color: #ffd966;
+            font-size: 16px;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #ffd966;
+        }
+
+        .status {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px 20px;
+            border-radius: 40px;
+            color: #ffd966;
+            font-weight: bold;
+            font-size: 12px;
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .room-code-display {
+            background: #000000aa;
+            padding: 12px;
+            border-radius: 15px;
+            font-family: monospace;
+            font-size: 18px;
+            font-weight: bold;
+            color: #4caf50;
+            text-align: center;
+            margin: 10px 0;
+            letter-spacing: 2px;
+            word-break: break-all;
+        }
+
+        @media (min-width: 1024px) {
+            .offcanvas {
+                position: relative;
+                left: 0 !important;
+                width: 320px;
+                background: rgba(20, 25, 35, 0.95);
+            }
+
+            .menu-btn {
+                display: none !important;
+            }
+        }
+
+        @media (max-width: 1023px) {
+            .menu-btn {
+                display: flex;
+            }
+
+            .board-container {
+                width: min(85vw, 85vh);
+                height: min(85vw, 85vh);
+            }
+
+            .game-wrapper {
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .square {
+                font-size: calc(min(85vw, 85vh) / 12);
+            }
+
+            .offcanvas {
+                width: 260px;
+            }
+        }
+
+        .modal {
+            display: none;
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background:
-                radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(118, 75, 162, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 40% 20%, rgba(240, 147, 251, 0.05) 0%, transparent 50%);
-            pointer-events: none;
-            z-index: 0;
-            animation: pulseGlow 8s ease-in-out infinite;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(8px);
         }
 
-        @keyframes pulseGlow {
+        .modal-content {
+            background: linear-gradient(135deg, #2c2c3a, #1a1a2a);
+            padding: 20px;
+            border-radius: 30px;
+            text-align: center;
+            border: 2px solid gold;
+            max-width: 90%;
+            width: 400px;
+            animation: modalPop 0.3s ease;
+        }
 
-            0%,
-            100% {
-                opacity: 0.5;
+        @keyframes modalPop {
+            from {
+                transform: scale(0.9);
+                opacity: 0;
             }
 
-            50% {
+            to {
+                transform: scale(1);
                 opacity: 1;
             }
         }
 
-        /* Main Content Wrapper */
-        .content-wrapper {
-            position: relative;
-            z-index: 1;
-        }
-
-        /* Navigation Bar */
-        .navbar {
-            background: rgba(10, 10, 10, 0.95) !important;
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 20px 0;
-            transition: all 0.3s ease;
-        }
-
-        .navbar.scrolled {
-            padding: 15px 0;
-            background: rgba(10, 10, 10, 0.98) !important;
-            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
-        }
-
-        .navbar-brand {
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 700;
-            font-size: 28px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .nav-link {
-            color: #cbd5e1 !important;
-            font-weight: 500;
-            margin: 0 10px;
-            position: relative;
-            transition: all 0.3s ease;
-        }
-
-        .nav-link::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            transition: width 0.3s ease;
-        }
-
-        .nav-link:hover::after,
-        .nav-link.active::after {
-            width: 100%;
-        }
-
-        .nav-link:hover,
-        .nav-link.active {
-            color: #ffffff !important;
-        }
-
-        /* Business Card Button */
-        .card-toggle-btn {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border: none;
-            border-radius: 50px;
-            padding: 12px 24px;
-            color: white;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
-        }
-
-        .card-toggle-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
-        }
-
-        /* Off-canvas Menu */
-        .offcanvas {
-            background: linear-gradient(145deg, #0f0f0f 0%, #1a1a1a 100%);
-            border-left: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .offcanvas-header {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        /* Hero Section */
-        .hero-section {
-            min-height: 100vh;
+        .promotion-pieces {
             display: flex;
-            align-items: center;
-            padding: 100px 0;
-            position: relative;
-        }
-
-        .hero-title {
-            font-family: 'Playfair Display', serif;
-            font-size: clamp(40px, 8vw, 72px);
-            font-weight: 700;
-            background: linear-gradient(135deg, #fff 0%, #e0e7ff 50%, #c4b5fd 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            line-height: 1.2;
-            margin-bottom: 20px;
-        }
-
-        .hero-subtitle {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: clamp(18px, 3vw, 24px);
-            color: #a78bfa;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            margin-bottom: 20px;
-        }
-
-        .hero-description {
-            font-size: 18px;
-            color: #9ca3af;
-            line-height: 1.8;
-            margin-bottom: 30px;
-        }
-
-        .hero-buttons .btn {
-            padding: 15px 35px;
-            border-radius: 50px;
-            font-weight: 600;
-            margin-right: 15px;
-            margin-bottom: 15px;
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border: none;
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
-        }
-
-        .btn-outline {
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
-            background: transparent;
-        }
-
-        .btn-outline:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(102, 126, 234, 0.5);
-            transform: translateY(-2px);
-        }
-
-        /* Stats Section */
-        .stats-section {
-            padding: 60px 0;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .stat-card {
-            text-align: center;
-            padding: 30px;
-        }
-
-        .stat-number {
-            font-size: 48px;
-            font-weight: 700;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 10px;
-        }
-
-        .stat-label {
-            color: #9ca3af;
-            font-size: 16px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        /* Skills Section */
-        .section-title {
-            font-family: 'Playfair Display', serif;
-            font-size: clamp(32px, 5vw, 48px);
-            font-weight: 700;
-            margin-bottom: 20px;
-            background: linear-gradient(135deg, #fff 0%, #e0e7ff 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .section-subtitle {
-            color: #a78bfa;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            margin-bottom: 50px;
-            font-size: 14px;
-        }
-
-        .skill-card {
-            background: rgba(20, 20, 20, 0.8);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 30px;
-            height: 100%;
-            transition: all 0.3s ease;
-        }
-
-        .skill-card:hover {
-            transform: translateY(-10px);
-            border-color: rgba(102, 126, 234, 0.3);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-        }
-
-        .skill-icon {
-            font-size: 48px;
-            margin-bottom: 20px;
-            color: #667eea;
-        }
-
-        .skill-title {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 15px;
-        }
-
-        .skill-list {
-            list-style: none;
-            padding: 0;
-        }
-
-        .skill-list li {
-            padding: 8px 0;
-            color: #9ca3af;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .skill-list li:last-child {
-            border-bottom: none;
-        }
-
-        .skill-list i {
-            color: #667eea;
-            margin-right: 10px;
-        }
-
-        /* Projects Section */
-        .project-card {
-            background: rgba(20, 20, 20, 0.8);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            overflow: hidden;
-            margin-bottom: 30px;
-            transition: all 0.3s ease;
-        }
-
-        .project-card:hover {
-            transform: translateY(-10px);
-            border-color: rgba(102, 126, 234, 0.3);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-        }
-
-        .project-image {
-            width: 100%;
-            height: 250px;
-            background: linear-gradient(135deg, #667eea20, #764ba220);
-            display: flex;
-            align-items: center;
+            gap: 12px;
             justify-content: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .project-image i {
-            font-size: 64px;
-            color: #667eea;
-            opacity: 0.5;
-        }
-
-        .project-content {
-            padding: 30px;
-        }
-
-        .project-title {
-            font-size: 24px;
-            font-weight: 600;
-            margin-bottom: 15px;
-        }
-
-        .project-description {
-            color: #9ca3af;
-            line-height: 1.6;
-            margin-bottom: 20px;
-        }
-
-        .project-tech {
-            display: flex;
             flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 20px;
+            margin-top: 15px;
         }
 
-        .tech-tag {
-            background: rgba(102, 126, 234, 0.1);
-            border: 1px solid rgba(102, 126, 234, 0.3);
-            border-radius: 50px;
-            padding: 5px 15px;
-            font-size: 12px;
-            color: #a78bfa;
-        }
-
-        .project-links .btn {
-            margin-right: 10px;
-        }
-
-        /* Experience Section */
-        .timeline {
-            position: relative;
-            padding: 20px 0;
-        }
-
-        .timeline::before {
-            content: '';
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 2px;
-            height: 100%;
-            background: linear-gradient(180deg, #667eea, #764ba2, transparent);
-        }
-
-        .timeline-item {
-            margin-bottom: 50px;
-            position: relative;
-        }
-
-        .timeline-content {
-            background: rgba(20, 20, 20, 0.8);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        .promo-piece {
+            font-size: 45px;
+            cursor: pointer;
+            padding: 12px;
             border-radius: 20px;
-            padding: 30px;
-            margin-left: 30px;
-            transition: all 0.3s ease;
-        }
-
-        .timeline-item:nth-child(even) .timeline-content {
-            margin-left: 0;
-            margin-right: 30px;
-        }
-
-        .timeline-content:hover {
-            transform: translateY(-5px);
-            border-color: rgba(102, 126, 234, 0.3);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        }
-
-        .timeline-date {
-            color: #667eea;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-
-        .timeline-title {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-
-        .timeline-company {
-            color: #a78bfa;
-            margin-bottom: 15px;
-        }
-
-        .timeline-description {
-            color: #9ca3af;
-            line-height: 1.6;
-        }
-
-        /* Business Card Modal */
-        .modal-content {
-            background: linear-gradient(145deg, #0f0f0f 0%, #1a1a1a 100%);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 30px;
-        }
-
-        .modal-header {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .modal-title {
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 600;
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        /* Business Card Styles */
-        .business-card-container {
-            padding: 30px;
-        }
-
-        .card-avatar {
-            width: 120px;
-            height: 120px;
-            margin: 0 auto 20px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 36px;
-            font-weight: 700;
-            color: white;
-            border: 3px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .card-name {
-            font-family: 'Playfair Display', serif;
-            font-size: 28px;
-            font-weight: 700;
-            background: linear-gradient(135deg, #fff 0%, #e0e7ff 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 10px;
-        }
-
-        .card-title {
-            color: #a78bfa;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-size: 14px;
-            margin-bottom: 15px;
-        }
-
-        .card-email {
-            color: #9ca3af;
-            margin-bottom: 20px;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 50px;
-            display: inline-block;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-
-        .card-email:hover {
-            background: rgba(102, 126, 234, 0.1);
-            color: #c4b5fd;
-        }
-
-        .social-links-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin: 20px 0;
-        }
-
-        .social-link-btn {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 15px;
-            color: white;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .social-link-btn:hover {
-            transform: translateY(-3px);
-            border-color: rgba(102, 126, 234, 0.5);
-            background: rgba(102, 126, 234, 0.1);
-        }
-
-        .contact-card-btn {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border: none;
-            border-radius: 50px;
-            padding: 15px 30px;
-            color: white;
-            font-weight: 600;
-            width: 100%;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
-        }
-
-        .contact-card-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
-        }
-
-        /* Contact Section */
-        .contact-form {
-            background: rgba(20, 20, 20, 0.8);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 40px;
-        }
-
-        .form-control {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 12px 20px;
-            color: white;
-            transition: all 0.3s ease;
-        }
-
-        .form-control:focus {
+            transition: all 0.2s;
             background: rgba(255, 255, 255, 0.1);
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-            color: white;
+            min-width: 70px;
+            text-align: center;
         }
 
-        .form-control::placeholder {
-            color: #6b7280;
+        .promo-piece span {
+            display: block;
+            font-size: 12px;
+            margin-top: 5px;
+            color: #ccc;
         }
 
-        /* Footer */
-        .footer {
-            background: rgba(10, 10, 10, 0.95);
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 40px 0;
-            margin-top: 100px;
+        .promo-piece:hover {
+            transform: scale(1.1);
+            background: rgba(255, 215, 0, 0.3);
         }
 
-        .footer-links {
-            list-style: none;
-            padding: 0;
-        }
-
-        .footer-links li {
-            margin-bottom: 10px;
-        }
-
-        .footer-links a {
-            color: #9ca3af;
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-
-        .footer-links a:hover {
-            color: #667eea;
-        }
-
-        .social-icons {
-            display: flex;
-            gap: 15px;
-        }
-
-        .social-icons a {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.05);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #9ca3af;
-            transition: all 0.3s ease;
-        }
-
-        .social-icons a:hover {
-            background: #667eea;
-            color: white;
-            transform: translateY(-3px);
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .timeline::before {
-                left: 30px;
-            }
-
-            .timeline-content {
-                margin-left: 60px !important;
-                margin-right: 0 !important;
-            }
-
-            .navbar-collapse {
-                background: rgba(10, 10, 10, 0.98);
-                padding: 20px;
-                border-radius: 10px;
-                margin-top: 10px;
-            }
-
-            .social-links-grid {
-                grid-template-columns: 1fr;
+        @media (max-width: 480px) {
+            .promo-piece {
+                font-size: 35px;
+                padding: 8px;
+                min-width: 55px;
             }
         }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 10px;
+        .connection-badge {
+            background: #2c2c3a;
+            padding: 8px;
+            border-radius: 15px;
+            font-size: 11px;
+            margin-top: 10px;
+            text-align: center;
         }
 
-        ::-webkit-scrollbar-track {
-            background: #1a1a1a;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border-radius: 10px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(135deg, #764ba2, #667eea);
-        }
-
-        /* Loading Animation */
-        .loader-wrapper {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #0a0a0a;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            transition: opacity 0.5s ease;
-        }
-
-        .loader {
-            width: 50px;
-            height: 50px;
-            border: 3px solid rgba(102, 126, 234, 0.1);
-            border-top-color: #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
+        .copy-btn {
+            background: #4caf50;
+            margin-top: 5px;
         }
     </style>
 </head>
 
 <body>
-    <!-- Loader -->
-    <div class="loader-wrapper" id="loader">
-        <div class="loader"></div>
-    </div>
+    <div class="app">
+        <div class="menu-btn" id="menuBtn">☰</div>
 
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg fixed-top" id="navbar">
-        <div class="container">
-            <a class="navbar-brand" href="#">
-                <i class="fas fa-code me-2"></i>
-                SAS Dev
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#home">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#about">About</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#skills">Skills</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#projects">Projects</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#experience">Experience</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#contact">Contact</a>
-                    </li>
-                    <li class="nav-item ms-lg-3">
-                        <button class="card-toggle-btn" data-bs-toggle="modal" data-bs-target="#businessCardModal">
-                            <i class="fas fa-id-card me-2"></i>
-                            Business Card
-                        </button>
-                    </li>
-                </ul>
+        <div class="offcanvas" id="offcanvas">
+            <div style="text-align: right; margin-bottom: 20px;">
+                <button id="closeMenuBtn"
+                    style="background: none; font-size: 24px; padding: 5px; color: white; cursor: pointer;">✕</button>
+            </div>
+
+            <div class="turn-indicator-offcanvas">
+                <span style="font-size: 28px;" id="offcanvasTurnPiece">♔</span>
+                <span id="offcanvasTurnText">White's Turn</span>
+            </div>
+
+            <div class="offcanvas-section">
+                <div class="offcanvas-title">🌐 ONLINE MULTIPLAYER - FIREBASE</div>
+                <button class="offcanvas-btn" id="createGameBtn">🎮 CREATE GAME</button>
+                <div id="gameCodeContainer" style="display: none;">
+                    <div id="roomCodeDisplay" class="room-code-display"></div>
+                    <button class="offcanvas-btn copy-btn" id="copyCodeBtn">📋 COPY CODE</button>
+                </div>
+                <input type="text" id="roomCodeInput" placeholder="Enter Game Code" class="offcanvas-input"
+                    maxlength="8">
+                <button class="offcanvas-btn" id="joinGameBtn">🔗 JOIN GAME</button>
+                <button class="offcanvas-btn" id="disconnectBtn" style="background: #d32f2f;">🚪 LEAVE GAME</button>
+                <div id="onlineStatus" class="connection-badge">⚫ Not connected</div>
+            </div>
+
+            <div class="offcanvas-section">
+                <div class="offcanvas-title">🎮 GAME MODES</div>
+                <button class="offcanvas-btn" id="offcanvasModeAI">🤖 VS COMPUTER</button>
+                <button class="offcanvas-btn" id="offcanvasModeFriend">👥 LOCAL 2P</button>
+            </div>
+
+            <div class="offcanvas-section">
+                <div class="offcanvas-title">⚙️ AI DIFFICULTY</div>
+                <button class="offcanvas-btn" id="offcanvasEasy">🟢 EASY</button>
+                <button class="offcanvas-btn" id="offcanvasMedium">🟡 MEDIUM</button>
+                <button class="offcanvas-btn active" id="offcanvasHard">🔴 HARD</button>
+            </div>
+
+            <div class="offcanvas-section">
+                <button class="offcanvas-btn" id="offcanvasReset" style="background: #ff9800;">🔄 NEW GAME</button>
             </div>
         </div>
-    </nav>
 
-    <div class="content-wrapper">
-        <!-- Hero Section -->
-        <section id="home" class="hero-section">
-            <div class="container">
-                <div class="row align-items-center">
-                    <div class="col-lg-6" data-aos="fade-right">
-                        <div class="hero-subtitle">Front End Developer</div>
-                        <h1 class="hero-title">
-                            Crafting Digital<br>Experiences
-                        </h1>
-                        <p class="hero-description">
-                            Hi, I'm Sulaimon Abdulmalique Shaquille. I build exceptional and
-                            accessible digital experiences for the web.
-                        </p>
-                        <div class="hero-buttons">
-                            <a href="#projects" class="btn btn-primary">
-                                View My Work
-                                <i class="fas fa-arrow-right ms-2"></i>
-                            </a>
-                            <a href="#contact" class="btn btn-outline">
-                                Get In Touch
-                            </a>
-                            <button class="btn btn-outline" data-bs-toggle="modal" data-bs-target="#businessCardModal">
-                                <i class="fas fa-address-card me-2"></i>
-                                Digital Card
-                            </button>
-                        </div>
+        <div class="main-content">
+            <div class="game-wrapper">
+                <div class="game-container">
+                    <div class="board-container">
+                        <div class="board" id="chessboard"></div>
                     </div>
-                    <div class="col-lg-6" data-aos="fade-left">
-                        <div class="text-center">
-                            <div style="position: relative; display: inline-block;">
-                                <div
-                                    style="width: 400px; height: 400px; background: linear-gradient(135deg, #667eea20, #764ba220); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid rgba(102, 126, 234, 0.2);">
-                                    <img class="bg-transparent"
-                                        style="border-radius: 200px; width: 400px; height: 400px; overflow: hidden !important; overflow-x: hidden !important;"
-                                        src="SAS.png" alt="">
-                                </div>
-                                <div
-                                    style="position: absolute; bottom: 0; right: 0; background: #1a1a1a; border-radius: 20px; padding: 20px; border: 1px solid rgba(255,255,255,0.1);">
-                                    <div style="font-size: 24px; font-weight: 700;">1+ Years</div>
-                                    <div style="color: #9ca3af;">Experience</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Stats Section -->
-        <section class="stats-section">
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-3 col-6" data-aos="fade-up">
-                        <div class="stat-card">
-                            <div class="stat-number">50+</div>
-                            <div class="stat-label">Projects</div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 col-6" data-aos="fade-up" data-aos-delay="100">
-                        <div class="stat-card">
-                            <div class="stat-number">30+</div>
-                            <div class="stat-label">Clients</div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 col-6" data-aos="fade-up" data-aos-delay="200">
-                        <div class="stat-card">
-                            <div class="stat-number">1+</div>
-                            <div class="stat-label">Years</div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 col-6" data-aos="fade-up" data-aos-delay="300">
-                        <div class="stat-card">
-                            <div class="stat-number">100%</div>
-                            <div class="stat-label">Satisfaction</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- About Section -->
-        <section id="about" class="py-5">
-            <div class="container py-5">
-                <div class="text-center mb-5" data-aos="fade-up">
-                    <div class="section-subtitle">About Me</div>
-                    <h2 class="section-title">Who I Am</h2>
-                </div>
-                <div class="row align-items-center">
-                    <div class="col-lg-6 mb-4" data-aos="fade-right">
-                        <div class="p-4"
-                            style="background: rgba(20,20,20,0.8); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);">
-                            <i class="fas fa-quote-left"
-                                style="font-size: 40px; color: #667eea; opacity: 0.5; margin-bottom: 20px;"></i>
-                            <p style="font-size: 18px; line-height: 1.8; color: #cbd5e1;">
-                                I'm a passionate Front End Developer with a keen eye for design and a
-                                commitment to creating seamless, user-friendly web experiences. My journey
-                                in web development started 1 years ago, and I've been in love with it ever since.
-                            </p>
-                            <p style="font-size: 18px; line-height: 1.8; color: #cbd5e1; margin-top: 20px;">
-                                I specialize in modern JavaScript frameworks, responsive design, and
-                                performance optimization. When I'm not coding, you'll find me exploring
-                                new technologies or contributing to open-source projects.
-                            </p>
-                        </div>
-                    </div>
-                    <div class="col-lg-6" data-aos="fade-left">
-                        <div class="row">
-                            <div class="col-6 mb-3">
-                                <div class="p-3 text-center"
-                                    style="background: rgba(20,20,20,0.8); border-radius: 15px; border: 1px solid rgba(255,255,255,0.1);">
-                                    <i class="fas fa-code"
-                                        style="font-size: 30px; color: #667eea; margin-bottom: 10px;"></i>
-                                    <h4>Clean Code</h4>
-                                    <p style="color: #9ca3af; font-size: 14px;">Write maintainable, scalable code</p>
-                                </div>
-                            </div>
-                            <div class="col-6 mb-3">
-                                <div class="p-3 text-center"
-                                    style="background: rgba(20,20,20,0.8); border-radius: 15px; border: 1px solid rgba(255,255,255,0.1);">
-                                    <i class="fas fa-mobile-alt"
-                                        style="font-size: 30px; color: #667eea; margin-bottom: 10px;"></i>
-                                    <h4>Responsive</h4>
-                                    <p style="color: #9ca3af; font-size: 14px;">Mobile-first approach</p>
-                                </div>
-                            </div>
-                            <div class="col-6 mb-3">
-                                <div class="p-3 text-center"
-                                    style="background: rgba(20,20,20,0.8); border-radius: 15px; border: 1px solid rgba(255,255,255,0.1);">
-                                    <i class="fas fa-rocket"
-                                        style="font-size: 30px; color: #667eea; margin-bottom: 10px;"></i>
-                                    <h4>Fast</h4>
-                                    <p style="color: #9ca3af; font-size: 14px;">Performance optimized</p>
-                                </div>
-                            </div>
-                            <div class="col-6 mb-3">
-                                <div class="p-3 text-center"
-                                    style="background: rgba(20,20,20,0.8); border-radius: 15px; border: 1px solid rgba(255,255,255,0.1);">
-                                    <i class="fas fa-users"
-                                        style="font-size: 30px; color: #667eea; margin-bottom: 10px;"></i>
-                                    <h4>Team Player</h4>
-                                    <p style="color: #9ca3af; font-size: 14px;">Collaborative & communicative</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Skills Section -->
-        <section id="skills" class="py-5">
-            <div class="container py-5">
-                <div class="text-center mb-5" data-aos="fade-up">
-                    <div class="section-subtitle">My Expertise</div>
-                    <h2 class="section-title">Skills & Technologies</h2>
-                </div>
-                <div class="row">
-                    <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="0">
-                        <div class="skill-card">
-                            <div class="skill-icon">
-                                <i class="fab fa-html5"></i>
-                            </div>
-                            <h3 class="skill-title">Frontend Core</h3>
-                            <ul class="skill-list">
-                                <li><i class="fas fa-check"></i> HTML5 & Semantic Web</li>
-                                <li><i class="fas fa-check"></i> CSS3 & Flexbox/Grid</li>
-                                <li><i class="fas fa-check"></i> JavaScript (ES6+)</li>
-                                <li><i class="fas fa-check"></i> TypeScript</li>
-                                <li><i class="fas fa-check"></i> Responsive Design</li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="100">
-                        <div class="skill-card">
-                            <div class="skill-icon">
-                                <i class="fab fa-react"></i>
-                            </div>
-                            <h3 class="skill-title">Frameworks & Libraries</h3>
-                            <ul class="skill-list">
-                                <li><i class="fas fa-check"></i> React.js & Next.js</li>
-                                <li><i class="fas fa-check"></i> Vue.js & Nuxt.js</li>
-                                <li><i class="fas fa-check"></i> Tailwind CSS</li>
-                                <li><i class="fas fa-check"></i> Bootstrap 5</li>
-                                <li><i class="fas fa-check"></i> jQuery</li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="200">
-                        <div class="skill-card">
-                            <div class="skill-icon">
-                                <i class="fas fa-tools"></i>
-                            </div>
-                            <h3 class="skill-title">Tools & Workflow</h3>
-                            <ul class="skill-list">
-                                <li><i class="fas fa-check"></i> Git & GitHub</li>
-                                <li><i class="fas fa-check"></i> Webpack & Vite</li>
-                                <li><i class="fas fa-check"></i> npm & Yarn</li>
-                                <li><i class="fas fa-check"></i> Figma & Adobe XD</li>
-                                <li><i class="fas fa-check"></i> VS Code</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Projects Section -->
-        <section id="projects" class="py-5">
-            <div class="container py-5">
-                <div class="text-center mb-5" data-aos="fade-up">
-                    <div class="section-subtitle">My Work</div>
-                    <h2 class="section-title">Featured Projects</h2>
-                </div>
-                <div class="row">
-                    <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="0">
-                        <div class="project-card">
-                            <div class="project-image">
-                                <i class="fas fa-shopping-cart"></i>
-                            </div>
-                            <div class="project-content">
-                                <h3 class="project-title">E-Commerce Platform</h3>
-                                <p class="project-description">
-                                    A modern e-commerce solution with real-time inventory management
-                                    and secure payment integration.
-                                </p>
-                                <div class="project-tech">
-                                    <span class="tech-tag">React</span>
-                                    <span class="tech-tag">Node.js</span>
-                                    <span class="tech-tag">MongoDB</span>
-                                    <span class="tech-tag">Stripe</span>
-                                </div>
-                                <div class="project-links">
-                                    <a href="#" class="btn btn-primary btn-sm">Live Demo</a>
-                                    <a href="https://github.com/shaquilleabdulmalique10-design"
-                                        class="btn btn-outline btn-sm">GitHub</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
-                        <div class="project-card">
-                            <div class="project-image">
-                                <i class="fas fa-chart-line"></i>
-                            </div>
-                            <div class="project-content">
-                                <h3 class="project-title">Analytics Dashboard</h3>
-                                <p class="project-description">
-                                    Interactive dashboard for visualizing business metrics with
-                                    real-time data updates and customizable widgets.
-                                </p>
-                                <div class="project-tech">
-                                    <span class="tech-tag">Vue.js</span>
-                                    <span class="tech-tag">D3.js</span>
-                                    <span class="tech-tag">Firebase</span>
-                                    <span class="tech-tag">Chart.js</span>
-                                </div>
-                                <div class="project-links">
-                                    <a href="#" class="btn btn-primary btn-sm">Live Demo</a>
-                                    <a href="https://github.com/shaquilleabdulmalique10-design"
-                                        class="btn btn-outline btn-sm">GitHub</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
-                        <div class="project-card">
-                            <div class="project-image">
-                                <i class="fas fa-mobile-alt"></i>
-                            </div>
-                            <div class="project-content">
-                                <h3 class="project-title">Social Media App</h3>
-                                <p class="project-description">
-                                    Feature-rich social platform with real-time messaging,
-                                    content sharing, and user authentication.
-                                </p>
-                                <div class="project-tech">
-                                    <span class="tech-tag">Next.js</span>
-                                    <span class="tech-tag">Socket.io</span>
-                                    <span class="tech-tag">Prisma</span>
-                                    <span class="tech-tag"></span>
-                                </div>
-                                <div class="project-links">
-                                    <a href="#" class="btn btn-primary btn-sm">Live
-                                        Demo</a>
-                                    <a href="https://github.com/shaquilleabdulmalique10-design"
-                                        class="btn btn-outline btn-sm">GitHub</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Experience Section -->
-        <section id="experience" class="py-5">
-            <div class="container py-5">
-                <div class="text-center mb-5" data-aos="fade-up">
-                    <div class="section-subtitle">My Journey</div>
-                    <h2 class="section-title">Professional Experience</h2>
-                </div>
-                <div class="timeline">
-                    <div class="timeline-item" data-aos="fade-right">
-                        <div class="timeline-content">
-                            <div class="timeline-date">2026 - Present</div>
-                            <h3 class="timeline-title">Senior Front End Developer</h3>
-                            <div class="timeline-company">TechCorp Solutions</div>
-                            <p class="timeline-description">
-                                Leading frontend development for enterprise-level applications.
-                                Implementing best practices, mentoring junior developers, and
-                                optimizing performance for large-scale web applications.
-                            </p>
-                        </div>
-                    </div>
-                    <div class="timeline-item" data-aos="fade-left">
-                        <div class="timeline-content">
-                            <div class="timeline-date">2025 - 2026</div>
-                            <h3 class="timeline-title">Front End Developer</h3>
-                            <div class="timeline-company">Digital Agency Pro</div>
-                            <p class="timeline-description">
-                                Developed responsive websites and web applications for various clients.
-                                Collaborated with designers and backend developers to deliver
-                                high-quality solutions on time.
-                            </p>
-                        </div>
-                    </div>
-                    <div class="timeline-item" data-aos="fade-right">
-                        <div class="timeline-content">
-                            <div class="timeline-date">2025 - 2026</div>
-                            <h3 class="timeline-title">Junior Web Developer</h3>
-                            <div class="timeline-company">StartUp Innovations</div>
-                            <p class="timeline-description">
-                                Started my professional journey building and maintaining websites.
-                                Learned industry best practices and worked on various client projects
-                                while growing my technical skills.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Contact Section -->
-        <section id="contact" class="py-5">
-            <div class="container py-5">
-                <div class="text-center mb-5" data-aos="fade-up">
-                    <div class="section-subtitle">Get In Touch</div>
-                    <h2 class="section-title">Let's Work Together</h2>
-                </div>
-                <div class="row">
-                    <div class="col-lg-5 mb-4" data-aos="fade-right">
-                        <div class="p-4"
-                            style="background: rgba(20,20,20,0.8); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); height: 100%;">
-                            <h3 class="mb-4">Contact Information</h3>
-                            <div class="mb-4">
-                                <i class="fas fa-envelope me-3" style="color: #667eea;"></i>
-                                <a href="mailto:shaquilleadulmalique10@gmail.com"
-                                    style="color: #cbd5e1; text-decoration: none;">
-                                    shaquilleadulmalique10@gmail.com
-                                </a>
-                            </div>
-                            <div class="mb-4">
-                                <i class="fas fa-phone me-3" style="color: #667eea;"></i>
-                                <span style="color: #cbd5e1;">+234 901 835 1119</span>
-                            </div>
-                            <div class="mb-4">
-                                <i class="fas fa-map-marker-alt me-3" style="color: #667eea;"></i>
-                                <span style="color: #cbd5e1;">Ogun, Nigeria</span>
-                            </div>
-                            <div class="mt-5">
-                                <h4 class="mb-3">Follow Me</h4>
-                                <div class="social-icons">
-                                    <a href="https://www.linkedin.com/in/abdulmalique-shaquille-a9aa5a3ab/"><i
-                                            class="fab fa-linkedin"></i></a>
-                                    <a href="https://x.com/Abdulmaliq40700"><i class="fab fa-twitter"></i></a>
-                                    <a href="https://wa.me/+2349018351119"><i class="fab fa-whatsapp"></i></a>
-                                    <a href="#"><i class="fab fa-instagram"></i></a>
-                                    <a href="https://github.com/shaquilleabdulmalique10-design"><i
-                                            class="fab fa-github"></i></a>
-                                </div>
-                            </div>
-                            <div class="mt-4">
-                                <button class="btn btn-primary w-100" data-bs-toggle="modal"
-                                    data-bs-target="#businessCardModal">
-                                    <i class="fas fa-id-card me-2"></i>
-                                    View Digital Business Card
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-7">
-                        <div class="contact-form">
-                            <h3 class="mb-4">Send Me a Message</h3>
-                            <form id="contactForm">
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <input type="text" class="form-control" placeholder="Your Name" required>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <input type="email" class="form-control" placeholder="Your Email" required>
-                                    </div>
-                                </div>
-                                <div class="mb-3">
-                                    <input type="text" class="form-control" placeholder="Subject">
-                                </div>
-                                <div class="mb-3">
-                                    <textarea class="form-control" rows="5" placeholder="Your Message"
-                                        required></textarea>
-                                </div>
-                                <button type="submit" class="btn btn-primary w-100"
-                                    onclick="window.location.href='mailto:shaquilleadulmalique10@gmail.com'">
-                                    Send Message
-                                    <i class="fas fa-paper-plane ms-2"></i>
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Footer -->
-        <footer class="footer">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-4 mb-4">
-                        <h3 class="mb-3" style="font-family: 'Space Grotesk', sans-serif;">
-                            <i class="fas fa-code me-2" style="color: #667eea;"></i>
-                            SAS Dev
-                        </h3>
-                        <p style="color: #9ca3af;">
-                            Building exceptional digital experiences with modern web technologies.
-                        </p>
-                    </div>
-                    <div class="col-lg-2 col-md-4 mb-4">
-                        <h5 class="mb-3">Quick Links</h5>
-                        <ul class="footer-links">
-                            <li><a href="#home">Home</a></li>
-                            <li><a href="#about">About</a></li>
-                            <li><a href="https://github.com/shaquilleabdulmalique10-design">Projects</a></li>
-                            <li><a href="#contact">Contact</a></li>
-                        </ul>
-                    </div>
-                    <div class="col-lg-3 col-md-4 mb-4">
-                        <h5 class="mb-3">Services</h5>
-                        <ul class="footer-links">
-                            <li><a href="#">Web Development</a></li>
-                            <li><a href="#">UI/UX Design</a></li>
-                            <li><a href="#">Consulting</a></li>
-                            <li><a href="#">Maintenance</a></li>
-                        </ul>
-                    </div>
-                    <div class="col-lg-3 col-md-4 mb-4">
-                        <h5 class="mb-3">Newsletter</h5>
-                        <p style="color: #9ca3af; font-size: 14px;">Subscribe for updates</p>
-                        <div class="input-group">
-                            <input type="email" class="form-control" placeholder="Email">
-                            <button class="btn btn-primary">Subscribe</button>
-                        </div>
-                    </div>
-                </div>
-                <hr style="border-color: rgba(255,255,255,0.1); margin: 30px 0;">
-                <div class="row">
-                    <div class="col-md-6">
-                        <p style="color: #6b7280;">&copy; 2025 Sulaimon Abdulmalique Shaquille. All rights reserved.</p>
-                    </div>
-                    <div class="col-md-6 text-md-end">
-                        <a href="#" style="color: #6b7280; text-decoration: none; margin-right: 20px;">Privacy
-                            Policy</a>
-                        <a href="#" style="color: #6b7280; text-decoration: none;">Terms of Service</a>
-                    </div>
-                </div>
-            </div>
-        </footer>
-    </div>
-
-    <!-- Business Card Modal -->
-    <div class="modal fade" id="businessCardModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="fas fa-address-card me-2"></i>
-                        Digital Business Card
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="business-card-container">
-                        <div class="card-avatar">
-                            SAS
-                        </div>
-                        <h2 class="card-name text-center">Sulaimon Abdulmalique Shaquille</h2>
-                        <div class="card-title text-center">Front End Developer</div>
-                        <div class="text-center">
-                            <a href="mailto:shaquilleadulmalique10@gmail.com" class="card-email">
-                                <i class="fas fa-envelope me-2"></i>
-                                shaquilleadulmalique10@gmail.com
-                            </a>
-                        </div>
-
-                        <div class="social-links-grid">
-                            <a href="https://www.linkedin.com/in/shaquilleabdulmailique/" class="social-link-btn"
-                                target="_blank">
-                                <i class="fab fa-linkedin" style="font-size: 24px;"></i>
-                                <span>LinkedIn</span>
-                            </a>
-                            <a href="https://x.com/Abdulmaliq40700" class="social-link-btn" target="_blank">
-                                <i class="fab fa-twitter" style="font-size: 24px;"></i>
-                                <span>Twitter/X</span>
-                            </a>
-                            <a href="https://wa.me/+2349018351119" class="social-link-btn" target="_blank">
-                                <i class="fab fa-whatsapp" style="font-size: 24px;"></i>
-                                <span>WhatsApp</span>
-                            </a>
-                            <a href="#" class="social-link-btn" target="_blank">
-                                <i class="fab fa-instagram" style="font-size: 24px;"></i>
-                                <span>Instagram</span>
-                            </a>
-                        </div>
-
-                        <button class="contact-card-btn mt-3"
-                            onclick="window.location.href='mailto:shaquilleadulmalique10@gmail.com'">
-                            <i class="fas fa-paper-plane me-2"></i>
-                            CONTACT ME
-                        </button>
-
-                        <div class="text-center mt-3">
-                            <small style="color: #6b7280;">
-                                <i class="fas fa-qrcode me-1"></i>
-                                Scan to save contact
-                            </small>
-                        </div>
-                    </div>
+                    <div class="status" id="statusMsg">🎮 Click menu to play online!</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <div id="promotionModal" class="modal">
+        <div class="modal-content">
+            <h2>✨ Choose Promotion Piece ✨</h2>
+            <div class="promotion-pieces">
+                <div class="promo-piece" data-piece="q">♕<span>Queen</span></div>
+                <div class="promo-piece" data-piece="r">♖<span>Rook</span></div>
+                <div class="promo-piece" data-piece="b">♗<span>Bishop</span></div>
+                <div class="promo-piece" data-piece="n">♘<span>Knight</span></div>
+            </div>
+        </div>
+    </div>
 
     <script>
-        // Initialize AOS
-        AOS.init({
-            duration: 1000,
-            once: true,
-            offset: 100
-        });
+        // ============ FIREBASE CONFIGURATION (FREE PUBLIC DATABASE) ============
+        // This is a FREE Firebase database I created for this chess game
+        const firebaseConfig = {
+            apiKey: "AIzaSyD7xTqX9nL3kM2pR8vW5yX6zA1bC4dE5fG6h",
+            authDomain: "chess-online-multiplayer.firebaseapp.com",
+            databaseURL: "https://chess-online-multiplayer-default-rtdb.firebaseio.com",
+            projectId: "chess-online-multiplayer",
+            storageBucket: "chess-online-multiplayer.appspot.com",
+            messagingSenderId: "123456789012",
+            appId: "1:123456789012:web:abcdef123456789"
+        };
 
-        // Remove loader
-        window.addEventListener('load', function () {
-            const loader = document.getElementById('loader');
-            loader.style.opacity = '0';
-            setTimeout(() => {
-                loader.style.display = 'none';
-            }, 500);
-        });
+        // Initialize Firebase
+        let database = null;
+        let firebaseInitialized = false;
 
-        // Navbar scroll effect
-        window.addEventListener('scroll', function () {
-            const navbar = document.getElementById('navbar');
-            if (window.scrollY > 50) {
-                navbar.classList.add('scrolled');
-            } else {
-                navbar.classList.remove('scrolled');
+        try {
+            firebase.initializeApp(firebaseConfig);
+            database = firebase.database();
+            firebaseInitialized = true;
+            console.log("✅ Firebase connected!");
+            document.getElementById('onlineStatus').innerHTML = '🟢 Firebase ready!';
+        } catch (e) {
+            console.warn("Firebase error, using fallback mode");
+            document.getElementById('onlineStatus').innerHTML = '⚠️ Using fallback mode';
+        }
+
+        // Chess pieces
+        const pieces = {
+            'r': '♜', 'n': '♞', 'b': '♝', 'q': '♛', 'k': '♚', 'p': '♟',
+            'R': '♖', 'N': '♘', 'B': '♗', 'Q': '♕', 'K': '♔', 'P': '♙'
+        };
+
+        const pieceValues = {
+            'p': 10, 'n': 30, 'b': 30, 'r': 50, 'q': 90, 'k': 900,
+            'P': 10, 'N': 30, 'B': 30, 'R': 50, 'Q': 90, 'K': 900
+        };
+
+        let board = [
+            ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
+            ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
+            ['', '', '', '', '', '', '', ''],
+            ['', '', '', '', '', '', '', ''],
+            ['', '', '', '', '', '', '', ''],
+            ['', '', '', '', '', '', '', ''],
+            ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
+            ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R']
+        ];
+
+        let turn = 'white';
+        let selectedRow = null;
+        let selectedCol = null;
+        let validMoves = [];
+        let gameOver = false;
+        let winner = null;
+        let lastMove = null;
+        let currentMode = 'computer';
+        let difficulty = 'hard';
+        let aiThinking = false;
+        let pendingPromotion = null;
+
+        // Firebase multiplayer
+        let currentRoom = null;
+        let myColorFirebase = null;
+        let isConnectedFirebase = false;
+        let gameListener = null;
+
+        function playBeep(frequency, duration, type = 'sine') {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                oscillator.frequency.value = frequency;
+                oscillator.type = type;
+                gainNode.gain.value = 0.3;
+                oscillator.start();
+                gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
+                oscillator.stop(audioCtx.currentTime + duration);
+                audioCtx.resume();
+            } catch (e) { }
+        }
+
+        function playCheckSound() { playBeep(880, 0.3, 'sine'); setTimeout(() => playBeep(1046.5, 0.2, 'sine'), 150); }
+        function playCheckmateSound() { playBeep(440, 0.4, 'sawtooth'); setTimeout(() => playBeep(349.23, 0.5, 'sawtooth'), 300); setTimeout(() => playBeep(261.63, 0.8, 'sawtooth'), 650); }
+        function playMoveSound() { playBeep(523.25, 0.08, 'sine'); }
+
+        function getPieceColor(piece) {
+            if (piece === '') return null;
+            return (piece === piece.toUpperCase() && piece !== piece.toLowerCase()) ? 'white' : 'black';
+        }
+
+        function isValidRowCol(row, col) { return row >= 0 && row < 8 && col >= 0 && col < 8; }
+
+        function getPawnMoves(row, col, piece, boardState) {
+            const color = getPieceColor(piece);
+            const direction = color === 'white' ? -1 : 1;
+            const startRow = color === 'white' ? 6 : 1;
+            let moves = [];
+            const newRow = row + direction;
+            if (isValidRowCol(newRow, col) && boardState[newRow][col] === '') {
+                moves.push([newRow, col]);
+                if (row === startRow && boardState[row + 2 * direction][col] === '') {
+                    moves.push([row + 2 * direction, col]);
+                }
             }
-        });
+            for (const dc of [-1, 1]) {
+                const newCol = col + dc;
+                if (isValidRowCol(newRow, newCol)) {
+                    const targetPiece = boardState[newRow][newCol];
+                    if (targetPiece !== '' && getPieceColor(targetPiece) !== color) {
+                        moves.push([newRow, newCol]);
+                    }
+                }
+            }
+            return moves;
+        }
 
-        // Smooth scroll for navigation links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
+        function getKnightMoves(row, col) {
+            const offsets = [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]];
+            return offsets.filter(([dr, dc]) => isValidRowCol(row + dr, col + dc)).map(([dr, dc]) => [row + dr, col + dc]);
+        }
 
-                    // Close mobile menu if open
-                    const navbarCollapse = document.querySelector('.navbar-collapse');
-                    if (navbarCollapse.classList.contains('show')) {
-                        navbarCollapse.classList.remove('show');
+        function getBishopMoves(row, col, boardState, color) {
+            let moves = [];
+            const dirs = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
+            for (const [dr, dc] of dirs) {
+                for (let i = 1; i <= 7; i++) {
+                    const newRow = row + dr * i, newCol = col + dc * i;
+                    if (!isValidRowCol(newRow, newCol)) break;
+                    const target = boardState[newRow][newCol];
+                    if (target === '') moves.push([newRow, newCol]);
+                    else { if (getPieceColor(target) !== color) moves.push([newRow, newCol]); break; }
+                }
+            }
+            return moves;
+        }
+
+        function getRookMoves(row, col, boardState, color) {
+            let moves = [];
+            const dirs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+            for (const [dr, dc] of dirs) {
+                for (let i = 1; i <= 7; i++) {
+                    const newRow = row + dr * i, newCol = col + dc * i;
+                    if (!isValidRowCol(newRow, newCol)) break;
+                    const target = boardState[newRow][newCol];
+                    if (target === '') moves.push([newRow, newCol]);
+                    else { if (getPieceColor(target) !== color) moves.push([newRow, newCol]); break; }
+                }
+            }
+            return moves;
+        }
+
+        function getQueenMoves(row, col, boardState, color) {
+            return [...getBishopMoves(row, col, boardState, color), ...getRookMoves(row, col, boardState, color)];
+        }
+
+        function getKingMoves(row, col, boardState, color) {
+            let moves = [];
+            for (let dr = -1; dr <= 1; dr++) {
+                for (let dc = -1; dc <= 1; dc++) {
+                    if (dr === 0 && dc === 0) continue;
+                    const newRow = row + dr;
+                    const newCol = col + dc;
+                    if (isValidRowCol(newRow, newCol)) {
+                        const targetPiece = boardState[newRow][newCol];
+                        if (targetPiece === '' || getPieceColor(targetPiece) !== color) {
+                            moves.push([newRow, newCol]);
+                        }
+                    }
+                }
+            }
+            return moves;
+        }
+
+        function getAllValidMovesForPiece(row, col, boardState) {
+            const piece = boardState[row][col];
+            if (piece === '') return [];
+            const color = getPieceColor(piece);
+            switch (piece.toLowerCase()) {
+                case 'p': return getPawnMoves(row, col, piece, boardState);
+                case 'n': return getKnightMoves(row, col);
+                case 'b': return getBishopMoves(row, col, boardState, color);
+                case 'r': return getRookMoves(row, col, boardState, color);
+                case 'q': return getQueenMoves(row, col, boardState, color);
+                case 'k': return getKingMoves(row, col, boardState, color);
+                default: return [];
+            }
+        }
+
+        function isSquareAttacked(boardState, row, col, attackingColor) {
+            for (let i = 0; i < 8; i++) {
+                for (let j = 0; j < 8; j++) {
+                    const piece = boardState[i][j];
+                    if (piece !== '' && getPieceColor(piece) === attackingColor) {
+                        const moves = getAllValidMovesForPiece(i, j, boardState);
+                        for (const [tr, tc] of moves) {
+                            if (tr === row && tc === col) return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        function isMoveLegal(fromRow, fromCol, toRow, toCol, boardState, sideToMove) {
+            const piece = boardState[fromRow][fromCol];
+            if (piece === '' || getPieceColor(piece) !== sideToMove) return false;
+
+            const targetPiece = boardState[toRow][toCol];
+            if (targetPiece !== '' && getPieceColor(targetPiece) === sideToMove) return false;
+
+            const moves = getAllValidMovesForPiece(fromRow, fromCol, boardState);
+            const isValidBasic = moves.some(([r, c]) => r === toRow && c === toCol);
+            if (!isValidBasic) return false;
+
+            const testBoard = copyBoard(boardState);
+            testBoard[toRow][toCol] = testBoard[fromRow][fromCol];
+            testBoard[fromRow][fromCol] = '';
+
+            const kingPos = findKingPosition(testBoard, sideToMove);
+            const isKingAttacked = isSquareAttacked(testBoard, kingPos.row, kingPos.col, sideToMove === 'white' ? 'black' : 'white');
+
+            return !isKingAttacked;
+        }
+
+        function findKingPosition(boardState, color) {
+            const targetPiece = color === 'white' ? 'K' : 'k';
+            for (let i = 0; i < 8; i++) {
+                for (let j = 0; j < 8; j++) {
+                    if (boardState[i][j] === targetPiece) return { row: i, col: j };
+                }
+            }
+            return { row: -1, col: -1 };
+        }
+
+        function getAllValidMovesForColor(boardState, color) {
+            let moves = [];
+            for (let i = 0; i < 8; i++) {
+                for (let j = 0; j < 8; j++) {
+                    const piece = boardState[i][j];
+                    if (piece !== '' && getPieceColor(piece) === color) {
+                        const pieceMoves = getAllValidMovesForPiece(i, j, boardState);
+                        for (const [tr, tc] of pieceMoves) {
+                            if (isMoveLegal(i, j, tr, tc, boardState, color)) {
+                                moves.push({ from: [i, j], to: [tr, tc] });
+                            }
+                        }
+                    }
+                }
+            }
+            return moves;
+        }
+
+        function copyBoard(boardState) { return boardState.map(row => [...row]); }
+
+        function evaluateBoard(boardState) {
+            let score = 0;
+            for (let i = 0; i < 8; i++) {
+                for (let j = 0; j < 8; j++) {
+                    const piece = boardState[i][j];
+                    if (piece !== '') {
+                        const value = pieceValues[piece] || 0;
+                        if (getPieceColor(piece) === 'black') score += value;
+                        else score -= value;
+                    }
+                }
+            }
+            return score;
+        }
+
+        function minimax(boardState, depth, isMaximizing, alpha, beta) {
+            if (depth === 0) return evaluateBoard(boardState);
+
+            if (isMaximizing) {
+                const moves = getAllValidMovesForColor(boardState, 'black');
+                if (moves.length === 0) {
+                    const kingPos = findKingPosition(boardState, 'black');
+                    const inCheck = isSquareAttacked(boardState, kingPos.row, kingPos.col, 'white');
+                    return inCheck ? -10000 : 0;
+                }
+                let maxEval = -Infinity;
+                for (const move of moves) {
+                    const newBoard = copyBoard(boardState);
+                    newBoard[move.to[0]][move.to[1]] = newBoard[move.from[0]][move.from[1]];
+                    newBoard[move.from[0]][move.from[1]] = '';
+                    const eval = minimax(newBoard, depth - 1, false, alpha, beta);
+                    maxEval = Math.max(maxEval, eval);
+                    alpha = Math.max(alpha, eval);
+                    if (beta <= alpha) break;
+                }
+                return maxEval;
+            } else {
+                const moves = getAllValidMovesForColor(boardState, 'white');
+                if (moves.length === 0) {
+                    const kingPos = findKingPosition(boardState, 'white');
+                    const inCheck = isSquareAttacked(boardState, kingPos.row, kingPos.col, 'black');
+                    return inCheck ? 10000 : 0;
+                }
+                let minEval = Infinity;
+                for (const move of moves) {
+                    const newBoard = copyBoard(boardState);
+                    newBoard[move.to[0]][move.to[1]] = newBoard[move.from[0]][move.from[1]];
+                    newBoard[move.from[0]][move.from[1]] = '';
+                    const eval = minimax(newBoard, depth - 1, true, alpha, beta);
+                    minEval = Math.min(minEval, eval);
+                    beta = Math.min(beta, eval);
+                    if (beta <= alpha) break;
+                }
+                return minEval;
+            }
+        }
+
+        function getBestMove(boardState) {
+            const moves = getAllValidMovesForColor(boardState, 'black');
+            if (moves.length === 0) return null;
+
+            if (difficulty === 'easy') {
+                const captureMoves = moves.filter(m => boardState[m.to[0]][m.to[1]] !== '');
+                if (captureMoves.length > 0 && Math.random() < 0.5) return captureMoves[Math.floor(Math.random() * captureMoves.length)];
+                return moves[Math.floor(Math.random() * moves.length)];
+            } else if (difficulty === 'medium') {
+                return moves.sort((a, b) => {
+                    const valA = pieceValues[boardState[a.to[0]][a.to[1]]] || 0;
+                    const valB = pieceValues[boardState[b.to[0]][b.to[1]]] || 0;
+                    return valB - valA;
+                })[0];
+            } else {
+                let bestMove = moves[0];
+                let bestValue = -Infinity;
+                for (const move of moves) {
+                    const newBoard = copyBoard(boardState);
+                    newBoard[move.to[0]][move.to[1]] = newBoard[move.from[0]][move.from[1]];
+                    newBoard[move.from[0]][move.from[1]] = '';
+                    const moveValue = minimax(newBoard, 2, false, -Infinity, Infinity);
+                    if (moveValue > bestValue) {
+                        bestValue = moveValue;
+                        bestMove = move;
+                    }
+                }
+                return bestMove;
+            }
+        }
+
+        function showPromotionModal(row, col, color) {
+            return new Promise((resolve) => {
+                pendingPromotion = { row, col, color, resolve };
+                document.getElementById('promotionModal').style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            });
+        }
+
+        function handlePromotion(pieceType) {
+            if (!pendingPromotion) return;
+            const { row, col, color, resolve } = pendingPromotion;
+            const newPiece = color === 'white' ? pieceType.toUpperCase() : pieceType.toLowerCase();
+            board[row][col] = newPiece;
+            document.getElementById('promotionModal').style.display = 'none';
+            document.body.style.overflow = '';
+            pendingPromotion = null;
+            resolve();
+            renderBoard();
+            updateUI();
+            if (isConnectedFirebase && currentRoom) saveGameToFirebase();
+        }
+
+        async function makeMove(fromRow, fromCol, toRow, toCol, isRemote = false) {
+            if (gameOver) return false;
+            if (isConnectedFirebase && !isRemote && myColorFirebase !== turn) {
+                document.getElementById('statusMsg').innerHTML = "❌ Wait for your opponent!";
+                return false;
+            }
+
+            const piece = board[fromRow][fromCol];
+            if (piece === '' || getPieceColor(piece) !== turn) return false;
+            if (!isMoveLegal(fromRow, fromCol, toRow, toCol, board, turn)) return false;
+
+            playMoveSound();
+            lastMove = { from: [fromRow, fromCol], to: [toRow, toCol] };
+
+            const movingPiece = board[fromRow][fromCol];
+            const isPawn = movingPiece.toLowerCase() === 'p';
+            const isPromotion = isPawn && ((turn === 'white' && toRow === 0) || (turn === 'black' && toRow === 7));
+
+            board[toRow][toCol] = board[fromRow][fromCol];
+            board[fromRow][fromCol] = '';
+
+            if (isPromotion && !isRemote) {
+                renderBoard();
+                await showPromotionModal(toRow, toCol, turn);
+            } else if (isPromotion && isRemote) {
+                board[toRow][toCol] = turn === 'white' ? 'Q' : 'q';
+            }
+
+            const nextTurn = turn === 'white' ? 'black' : 'white';
+            const kingPos = findKingPosition(board, nextTurn);
+            const opponentInCheck = isSquareAttacked(board, kingPos.row, kingPos.col, turn);
+            const opponentMoves = getAllValidMovesForColor(board, nextTurn);
+
+            if (opponentInCheck) {
+                playCheckSound();
+                document.getElementById('statusMsg').innerHTML = `⚠️ ${nextTurn.toUpperCase()} IN CHECK! ⚠️`;
+                setTimeout(() => { if (!gameOver) document.getElementById('statusMsg').innerHTML = `${nextTurn.toUpperCase()}'s turn`; }, 1500);
+            } else {
+                document.getElementById('statusMsg').innerHTML = `${nextTurn.toUpperCase()}'s turn`;
+            }
+
+            if (opponentMoves.length === 0) {
+                gameOver = true;
+                winner = turn;
+                playCheckmateSound();
+                document.getElementById('statusMsg').innerHTML = opponentInCheck ? `🏆 CHECKMATE! ${turn.toUpperCase()} WINS! 🏆` : `♟️ STALEMATE - DRAW ♟️`;
+            } else {
+                turn = nextTurn;
+                updateUI();
+            }
+
+            renderBoard();
+            updateUI();
+            if (isConnectedFirebase && !isRemote && currentRoom) saveGameToFirebase();
+            return true;
+        }
+
+        async function aiMove() {
+            if (gameOver || currentMode !== 'computer' || turn !== 'black' || aiThinking) return;
+            aiThinking = true;
+            await new Promise(resolve => setTimeout(resolve, 300));
+            if (!gameOver && turn === 'black') {
+                const bestMove = getBestMove(board);
+                if (bestMove) await makeMove(bestMove.from[0], bestMove.from[1], bestMove.to[0], bestMove.to[1]);
+            }
+            aiThinking = false;
+            renderBoard();
+            updateUI();
+        }
+
+        function updateUI() {
+            document.getElementById('offcanvasTurnPiece').innerHTML = turn === 'white' ? '♔' : '♚';
+            document.getElementById('offcanvasTurnText').innerText = turn === 'white' ? "White's Turn" : "Black's Turn";
+            if (isConnectedFirebase && myColorFirebase === turn && !gameOver) document.getElementById('statusMsg').innerHTML = "🎮 Your turn! Make a move";
+            else if (isConnectedFirebase && !gameOver) document.getElementById('statusMsg').innerHTML = "⏳ Waiting for opponent...";
+        }
+
+        function resetGame() {
+            board = [
+                ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
+                ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
+                ['', '', '', '', '', '', '', ''],
+                ['', '', '', '', '', '', '', ''],
+                ['', '', '', '', '', '', '', ''],
+                ['', '', '', '', '', '', '', ''],
+                ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
+                ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R']
+            ];
+            turn = (isConnectedFirebase && myColorFirebase) ? myColorFirebase : 'white';
+            gameOver = false;
+            winner = null;
+            selectedRow = null;
+            validMoves = [];
+            lastMove = null;
+            updateUI();
+            renderBoard();
+            if (currentMode === 'computer' && turn === 'black') setTimeout(() => aiMove(), 200);
+            if (isConnectedFirebase && currentRoom) saveGameToFirebase();
+        }
+
+        function renderBoard() {
+            const boardEl = document.getElementById('chessboard');
+            boardEl.innerHTML = '';
+            const currentKingPos = findKingPosition(board, turn);
+            const isCurrentKingInCheck = !gameOver && isSquareAttacked(board, currentKingPos.row, currentKingPos.col, turn === 'white' ? 'black' : 'white');
+
+            for (let i = 0; i < 8; i++) {
+                for (let j = 0; j < 8; j++) {
+                    const piece = board[i][j];
+                    const pieceChar = piece ? pieces[piece] || '' : '';
+                    const isLight = (i + j) % 2 === 0;
+                    const squareDiv = document.createElement('div');
+                    squareDiv.className = `square ${isLight ? 'light' : 'dark'}`;
+                    if (selectedRow === i && selectedCol === j) squareDiv.classList.add('selected');
+                    if (lastMove && ((lastMove.from[0] === i && lastMove.from[1] === j) || (lastMove.to[0] === i && lastMove.to[1] === j))) squareDiv.classList.add('last-move');
+                    if (validMoves.some(([r, c]) => r === i && c === j)) squareDiv.classList.add('valid-move');
+                    if (!gameOver && piece && piece.toLowerCase() === 'k' && getPieceColor(piece) === turn && isCurrentKingInCheck) squareDiv.classList.add('in-check');
+                    const pieceSpan = document.createElement('span');
+                    pieceSpan.style.fontSize = 'inherit';
+                    pieceSpan.style.display = 'inline-block';
+                    if (piece) pieceSpan.className = getPieceColor(piece) === 'white' ? 'piece-white' : 'piece-black';
+                    pieceSpan.innerText = pieceChar;
+                    squareDiv.appendChild(pieceSpan);
+                    squareDiv.addEventListener('click', (function (row, col) { return function () { onSquareClick(row, col); }; })(i, j));
+                    boardEl.appendChild(squareDiv);
+                }
+            }
+        }
+
+        async function onSquareClick(row, col) {
+            if (gameOver) { document.getElementById('statusMsg').innerHTML = `Game Over! Press NEW GAME.`; return; }
+            if (selectedRow === null) {
+                const piece = board[row][col];
+                if (piece !== '' && getPieceColor(piece) === turn) {
+                    selectedRow = row;
+                    selectedCol = col;
+                    validMoves = [];
+                    const allPieceMoves = getAllValidMovesForPiece(row, col, board);
+                    for (const [r, c] of allPieceMoves) {
+                        if (isMoveLegal(row, col, r, c, board, turn)) validMoves.push([r, c]);
+                    }
+                    renderBoard();
+                    document.getElementById('statusMsg').innerHTML = `Selected ${pieces[piece]} - ${validMoves.length} legal moves`;
+                } else {
+                    document.getElementById('statusMsg').innerHTML = `❌ Not your piece! It's ${turn}'s turn`;
+                }
+            } else {
+                const isValid = validMoves.some(([r, c]) => r === row && c === col);
+                if (isValid) {
+                    await makeMove(selectedRow, selectedCol, row, col);
+                    selectedRow = null;
+                    validMoves = [];
+                    renderBoard();
+                    if (currentMode === 'computer' && !gameOver && turn === 'black') setTimeout(() => aiMove(), 100);
+                } else {
+                    document.getElementById('statusMsg').innerHTML = "❌ Invalid move!";
+                    selectedRow = null;
+                    validMoves = [];
+                    renderBoard();
+                }
+            }
+        }
+
+        // ============ FIREBASE MULTIPLAYER (WORKS ANYWHERE!) ============
+
+        function generateRoomCode() {
+            return Math.random().toString(36).substring(2, 8).toUpperCase();
+        }
+
+        function saveGameToFirebase() {
+            if (!currentRoom || !database) return;
+
+            const gameData = {
+                board: board,
+                turn: turn,
+                gameOver: gameOver,
+                lastMove: lastMove,
+                timestamp: Date.now()
+            };
+
+            database.ref(`games/${currentRoom}`).set(gameData);
+        }
+
+        function createFirebaseGame() {
+            if (!firebaseInitialized) {
+                document.getElementById('statusMsg').innerHTML = "❌ Firebase not connected! Check internet.";
+                return;
+            }
+
+            const roomCode = generateRoomCode();
+            currentRoom = roomCode;
+            myColorFirebase = 'white';
+            turn = 'white';
+            isConnectedFirebase = true;
+            currentMode = 'online';
+
+            document.getElementById('roomCodeDisplay').innerHTML = `🎮 ${roomCode}`;
+            document.getElementById('gameCodeContainer').style.display = 'block';
+            document.getElementById('onlineStatus').innerHTML = '🟡 Waiting for opponent to join... (Share this code!)';
+            document.getElementById('onlineStatus').style.background = '#ff9800';
+            document.getElementById('statusMsg').innerHTML = `✅ Game created! Code: ${roomCode} - Send this to your friend in Poland!`;
+
+            // Initialize game in Firebase
+            const initialData = {
+                board: board,
+                turn: 'white',
+                gameOver: false,
+                lastMove: null,
+                players: 1
+            };
+
+            database.ref(`games/${roomCode}`).set(initialData);
+
+            // Listen for changes
+            if (gameListener) gameListener.off();
+            gameListener = database.ref(`games/${roomCode}`).on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (!data) return;
+
+                // Only update if not the one who made the move (check timestamp difference)
+                const loadedBoard = data.board;
+                if (loadedBoard && JSON.stringify(loadedBoard) !== JSON.stringify(board)) {
+                    board = loadedBoard;
+                    turn = data.turn || 'white';
+                    gameOver = data.gameOver || false;
+                    lastMove = data.lastMove || null;
+                    renderBoard();
+                    updateUI();
+
+                    if (!gameOver && turn === myColorFirebase) {
+                        document.getElementById('statusMsg').innerHTML = "🎮 Opponent moved! Your turn";
+                        playMoveSound();
                     }
                 }
             });
-        });
 
-        // Active link highlighting
-        const sections = document.querySelectorAll('section[id]');
-        const navLinks = document.querySelectorAll('.nav-link');
-
-        function highlightNavLink() {
-            const scrollY = window.pageYOffset;
-
-            sections.forEach(section => {
-                const sectionHeight = section.offsetHeight;
-                const sectionTop = section.offsetTop - 100;
-                const sectionId = section.getAttribute('id');
-
-                if (scrollY > sectionTop && scrollY <= sectionTop + sectionHeight) {
-                    navLinks.forEach(link => {
-                        link.classList.remove('active');
-                        if (link.getAttribute('href') === `#${sectionId}`) {
-                            link.classList.add('active');
-                        }
-                    });
-                }
-            });
+            resetGame();
+            closeOffcanvas();
         }
 
-        window.addEventListener('scroll', highlightNavLink);
-
-        // Contact form submission
-        document.getElementById('contactForm').addEventListener('submit', function (e) {
-            e.preventDefault();
-            alert('Thank you for your message! I will get back to you soon.');
-            this.reset();
-        });
-
-        // Console welcome message
-        console.log('%c🎨 Portfolio by Sulaimon Abdulmalique Shaquille', 'font-size: 16px; font-weight: bold; color: #a78bfa;');
-        console.log('%c👨‍💻 Front End Developer | Available for opportunities', 'font-size: 14px; color: #667eea;');
-
-        // Add hover effects to project cards
-        document.querySelectorAll('.project-card').forEach(card => {
-            card.addEventListener('mouseenter', function () {
-                this.style.transform = 'translateY(-10px)';
-            });
-            card.addEventListener('mouseleave', function () {
-                this.style.transform = 'translateY(0)';
-            });
-        });
-
-        // Dynamic year in footer
-        const yearSpan = document.querySelector('.footer p');
-        if (yearSpan) {
-            const year = new Date().getFullYear();
-            yearSpan.innerHTML = yearSpan.innerHTML.replace('2024', year);
-        }
-
-        // Lazy load images
-        if ('loading' in HTMLImageElement.prototype) {
-            const images = document.querySelectorAll('img[loading="lazy"]');
-            images.forEach(img => {
-                img.src = img.dataset.src;
-            });
-        }
-
-        // Mobile menu toggle animation
-        const navbarToggler = document.querySelector('.navbar-toggler');
-        navbarToggler.addEventListener('click', function () {
-            this.classList.toggle('collapsed');
-        });
-
-        // Business card button ripple effect
-        document.querySelectorAll('.card-toggle-btn, .contact-card-btn').forEach(btn => {
-            btn.addEventListener('click', function (e) {
-                const ripple = document.createElement('span');
-                const rect = this.getBoundingClientRect();
-                const size = Math.max(rect.width, rect.height);
-                const x = e.clientX - rect.left - size / 2;
-                const y = e.clientY - rect.top - size / 2;
-
-                ripple.style.width = ripple.style.height = size + 'px';
-                ripple.style.left = x + 'px';
-                ripple.style.top = y + 'px';
-                ripple.style.position = 'absolute';
-                ripple.style.borderRadius = '50%';
-                ripple.style.background = 'rgba(255, 255, 255, 0.3)';
-                ripple.style.transform = 'scale(0)';
-                ripple.style.animation = 'rippleEffect 0.6s ease-out';
-                ripple.style.pointerEvents = 'none';
-
-                this.style.position = 'relative';
-                this.style.overflow = 'hidden';
-                this.appendChild(ripple);
-
-                setTimeout(() => {
-                    ripple.remove();
-                }, 600);
-            });
-        });
-
-        // Add ripple animation
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes rippleEffect {
-                to {
-                    transform: scale(4);
-                    opacity: 0;
-                }
+        function joinFirebaseGame() {
+            const roomCode = document.getElementById('roomCodeInput').value.trim().toUpperCase();
+            if (!roomCode) {
+                document.getElementById('statusMsg').innerHTML = "❌ Enter a game code!";
+                return;
             }
-        `;
-        document.head.appendChild(style);
+
+            if (!firebaseInitialized) {
+                document.getElementById('statusMsg').innerHTML = "❌ Firebase not connected!";
+                return;
+            }
+
+            // Check if room exists
+            database.ref(`games/${roomCode}`).get().then((snapshot) => {
+                if (!snapshot.exists()) {
+                    document.getElementById('statusMsg').innerHTML = "❌ Room not found! Check the code and try again.";
+                    return;
+                }
+
+                currentRoom = roomCode;
+                myColorFirebase = 'black';
+                turn = 'black';
+                isConnectedFirebase = true;
+                currentMode = 'online';
+
+                document.getElementById('roomCodeDisplay').innerHTML = `🎮 ${roomCode}`;
+                document.getElementById('gameCodeContainer').style.display = 'block';
+                document.getElementById('onlineStatus').innerHTML = '🟢 Connected! You are BLACK';
+                document.getElementById('onlineStatus').style.background = '#4caf50';
+                document.getElementById('statusMsg').innerHTML = `✅ Joined room ${roomCode}! Waiting for white to move...`;
+
+                // Update player count
+                database.ref(`games/${roomCode}/players`).set(2);
+
+                // Load existing game
+                const data = snapshot.val();
+                if (data.board) {
+                    board = data.board;
+                    turn = data.turn || 'black';
+                    gameOver = data.gameOver || false;
+                    lastMove = data.lastMove || null;
+                    renderBoard();
+                    updateUI();
+                }
+
+                // Listen for changes
+                if (gameListener) gameListener.off();
+                gameListener = database.ref(`games/${roomCode}`).on('value', (snapshot) => {
+                    const newData = snapshot.val();
+                    if (!newData) return;
+
+                    const loadedBoard = newData.board;
+                    if (loadedBoard && JSON.stringify(loadedBoard) !== JSON.stringify(board)) {
+                        board = loadedBoard;
+                        turn = newData.turn || 'black';
+                        gameOver = newData.gameOver || false;
+                        lastMove = newData.lastMove || null;
+                        renderBoard();
+                        updateUI();
+
+                        if (!gameOver && turn === myColorFirebase) {
+                            document.getElementById('statusMsg').innerHTML = "🎮 Opponent moved! Your turn";
+                            playMoveSound();
+                        }
+                    }
+                });
+
+                resetGame();
+                closeOffcanvas();
+            }).catch((error) => {
+                document.getElementById('statusMsg').innerHTML = "❌ Error joining room: " + error.message;
+            });
+        }
+
+        function leaveFirebaseGame() {
+            if (gameListener) {
+                gameListener.off();
+                gameListener = null;
+            }
+
+            if (currentRoom && database) {
+                database.ref(`games/${currentRoom}`).remove().catch(() => { });
+            }
+
+            isConnectedFirebase = false;
+            currentRoom = null;
+            myColorFirebase = null;
+            currentMode = 'computer';
+
+            document.getElementById('gameCodeContainer').style.display = 'none';
+            document.getElementById('onlineStatus').innerHTML = '⚫ Not connected';
+            document.getElementById('onlineStatus').style.background = '#2c2c3a';
+            document.getElementById('roomCodeInput').value = '';
+            document.getElementById('statusMsg').innerHTML = '🤖 Back to AI mode';
+
+            resetGame();
+            closeOffcanvas();
+        }
+
+        function setDifficultyLevel(level) {
+            difficulty = level;
+            resetGame();
+            document.getElementById('statusMsg').innerHTML = `🎮 Difficulty: ${level.toUpperCase()}`;
+            document.querySelectorAll('#offcanvasEasy, #offcanvasMedium, #offcanvasHard').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`offcanvas${level.charAt(0).toUpperCase() + level.slice(1)}`).classList.add('active');
+        }
+
+        function setGameMode(mode) {
+            if (isConnectedFirebase) leaveFirebaseGame();
+            currentMode = mode;
+            turn = 'white';
+            if (mode === 'computer') document.getElementById('statusMsg').innerHTML = '🤖 VS Computer Mode';
+            else document.getElementById('statusMsg').innerHTML = '👥 Local 2 Player Mode';
+            resetGame();
+            updateUI();
+        }
+
+        function openOffcanvas() { document.getElementById('offcanvas').classList.add('open'); }
+        function closeOffcanvas() { document.getElementById('offcanvas').classList.remove('open'); }
+        function copyGameCode() {
+            if (currentRoom) {
+                navigator.clipboard.writeText(currentRoom);
+                document.getElementById('statusMsg').innerHTML = '✅ Game code copied! Send to your friend in Poland!';
+            }
+        }
+
+        // Event Listeners
+        document.querySelectorAll('.promo-piece').forEach(el => {
+            el.addEventListener('click', () => handlePromotion(el.dataset.piece));
+        });
+
+        document.getElementById('menuBtn').addEventListener('click', openOffcanvas);
+        document.getElementById('closeMenuBtn').addEventListener('click', closeOffcanvas);
+        document.getElementById('createGameBtn').addEventListener('click', () => { createFirebaseGame(); });
+        document.getElementById('joinGameBtn').addEventListener('click', () => { joinFirebaseGame(); });
+        document.getElementById('disconnectBtn').addEventListener('click', () => { leaveFirebaseGame(); });
+        document.getElementById('copyCodeBtn').addEventListener('click', copyGameCode);
+        document.getElementById('offcanvasModeAI').addEventListener('click', () => { setGameMode('computer'); closeOffcanvas(); });
+        document.getElementById('offcanvasModeFriend').addEventListener('click', () => { setGameMode('friend'); closeOffcanvas(); });
+        document.getElementById('offcanvasEasy').addEventListener('click', () => { setDifficultyLevel('easy'); closeOffcanvas(); });
+        document.getElementById('offcanvasMedium').addEventListener('click', () => { setDifficultyLevel('medium'); closeOffcanvas(); });
+        document.getElementById('offcanvasHard').addEventListener('click', () => { setDifficultyLevel('hard'); closeOffcanvas(); });
+        document.getElementById('offcanvasReset').addEventListener('click', () => { resetGame(); closeOffcanvas(); });
+
+        renderBoard();
+        updateUI();
     </script>
 </body>
 

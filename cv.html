@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sulaimon Abdulmalique Shaquille - CV</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%23667eea;stop-opacity:1' /><stop offset='100%25' style='stop-color:%23764ba2;stop-opacity:1' /></linearGradient></defs><rect width='100' height='100' rx='20' fill='url(%23grad)'/><text x='50' y='70' font-family='Arial, sans-serif' font-size='60' font-weight='bold' fill='white' text-anchor='middle'>S</text></svg>">
+    
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .cv-container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: #ffffff;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Header Section */
+        .cv-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
+            padding: 50px 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cv-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .cv-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 42px;
+            font-weight: 800;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .cv-title-role {
+            font-size: 24px;
+            font-weight: 300;
+            margin-bottom: 25px;
+            opacity: 0.95;
+        }
+
+        .cv-contact-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+            font-size: 14px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .contact-item i {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .contact-item a {
+            color: #ffffff;
+            text-decoration: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .contact-item a:hover {
+            opacity: 0.8;
+        }
+
+        /* Main Content */
+        .cv-content {
+            padding: 50px 60px;
+        }
+
+        .cv-section {
+            margin-bottom: 40px;
+        }
+
+        .cv-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+            display: inline-block;
+        }
+
+        /* Profile Section */
+        .profile-text {
+            font-size: 15px;
+            line-height: 1.8;
+            color: #555;
+            text-align: justify;
+        }
+
+        /* Experience Section */
+        .experience-item {
+            margin-bottom: 30px;
+            padding-left: 25px;
+            border-left: 3px solid #e0e0e0;
+            position: relative;
+        }
+
+        .experience-item::before {
+            content: '';
+            position: absolute;
+            left: -7px;
+            top: 5px;
+            width: 11px;
+            height: 11px;
+            background: #667eea;
+            border-radius: 50%;
+            border: 3px solid #ffffff;
+            box-shadow: 0 0 0 2px #667eea;
+        }
+
+        .experience-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .experience-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .experience-role {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .experience-date {
+            font-size: 14px;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .experience-company {
+            font-size: 16px;
+            color: #764ba2;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .experience-description {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.7;
+        }
+
+        .experience-description ul {
+            margin-top: 10px;
+            padding-left: 20px;
+        }
+
+        .experience-description li {
+            margin-bottom: 5px;
+        }
+
+        /* Education Section */
+        .education-item {
+            margin-bottom: 25px;
+        }
+
+        .education-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .education-degree {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .education-school {
+            font-size: 16px;
+            color: #764ba2;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .education-date {
+            font-size: 14px;
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .education-description {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.7;
+        }
+
+        /* Skills Section */
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+        }
+
+        .skill-category {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .skill-category-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .skill-category-title i {
+            color: #667eea;
+            font-size: 18px;
+        }
+
+        .skill-list {
+            list-style: none;
+        }
+
+        .skill-list li {
+            font-size: 14px;
+            color: #666;
+            padding: 6px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .skill-list li::before {
+            content: '▹';
+            color: #667eea;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        /* Projects Section */
+        .project-item {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            border-left: 4px solid #764ba2;
+        }
+
+        .project-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .project-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .project-tech {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .tech-badge {
+            background: #667eea;
+            color: #ffffff;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .project-description {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.7;
+            margin-bottom: 10px;
+        }
+
+        .project-link {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: color 0.3s ease;
+        }
+
+        .project-link:hover {
+            color: #764ba2;
+        }
+
+        /* Certifications Section */
+        .cert-item {
+            margin-bottom: 15px;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .cert-item::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            top: 0;
+            color: #667eea;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .cert-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .cert-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .cert-issuer {
+            font-size: 14px;
+            color: #764ba2;
+            font-weight: 500;
+        }
+
+        .cert-date {
+            font-size: 13px;
+            color: #999;
+        }
+
+        /* Print Button */
+        .print-button {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #ffffff;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .print-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.6);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .cv-container {
+                margin: 20px;
+            }
+
+            .cv-header {
+                padding: 40px 30px;
+            }
+
+            .cv-name {
+                font-size: 32px;
+            }
+
+            .cv-title-role {
+                font-size: 20px;
+            }
+
+            .cv-content {
+                padding: 40px 30px;
+            }
+
+            .section-title {
+                font-size: 24px;
+            }
+
+            .cv-contact-info {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .skills-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .print-button {
+                bottom: 20px;
+                right: 20px;
+                padding: 12px 24px;
+                font-size: 14px;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            body {
+                background: #ffffff;
+            }
+
+            .cv-container {
+                margin: 0;
+                box-shadow: none;
+                max-width: 100%;
+            }
+
+            .print-button {
+                display: none;
+            }
+
+            .cv-section {
+                page-break-inside: avoid;
+            }
+
+            .experience-item,
+            .project-item {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="cv-container">
+        <!-- Header -->
+        <div class="cv-header">
+            <div class="header-content">
+                <h1 class="cv-name">SULAIMON ABDULMALIQUE SHAQUILLE</h1>
+                <p class="cv-title-role">Front End Developer</p>
+                <div class="cv-contact-info">
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <a href="mailto:shaquilleadulmalique10@gmail.com">shaquilleadulmalique10@gmail.com</a>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-phone"></i>
+                        <span>+234 901 835 1119</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Ogun, Nigeria</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fab fa-linkedin"></i>
+                        <a href="https://www.linkedin.com/in/abdulmalique-shaquille-a9aa5a3ab/"
+                            target="_blank">LinkedIn</a>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fab fa-github"></i>
+                        <a href="https://github.com/shaquilleabdulmalique10-design" target="_blank">GitHub</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="cv-content">
+            <!-- Profile Section -->
+            <div class="cv-section">
+                <h2 class="section-title">Professional Profile</h2>
+                <p class="profile-text">
+                    Passionate and dedicated Front End Developer with 1+ years of experience in creating
+                    responsive, user-friendly web applications. Proficient in modern JavaScript frameworks,
+                    HTML5, CSS3, and responsive design principles. Strong problem-solving skills with a keen
+                    eye for detail and design aesthetics. Committed to writing clean, maintainable code and
+                    staying current with emerging technologies and industry best practices. Proven ability
+                    to collaborate effectively in team environments and deliver high-quality solutions on time.
+                </p>
+            </div>
+
+            <!-- Experience Section -->
+            <div class="cv-section">
+                <h2 class="section-title">Professional Experience</h2>
+
+                <div class="experience-item">
+                    <div class="experience-header">
+                        <div class="experience-role">Senior Front End Developer</div>
+                        <div class="experience-date">2026 - Present</div>
+                    </div>
+                    <div class="experience-company">TechCorp Solutions</div>
+                    <div class="experience-description">
+                        <ul>
+                            <li>Leading frontend development for enterprise-level web applications serving 10,000+ users
+                            </li>
+                            <li>Implementing responsive designs and ensuring cross-browser compatibility</li>
+                            <li>Mentoring junior developers and conducting code reviews to maintain code quality</li>
+                            <li>Optimizing application performance, reducing load times by 40%</li>
+                            <li>Collaborating with UX designers and backend developers in agile environment</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="experience-item">
+                    <div class="experience-header">
+                        <div class="experience-role">Front End Developer</div>
+                        <div class="experience-date">2025 - 2026</div>
+                    </div>
+                    <div class="experience-company">Digital Agency Pro</div>
+                    <div class="experience-description">
+                        <ul>
+                            <li>Developed responsive websites and web applications for diverse clients</li>
+                            <li>Implemented modern UI/UX designs using React.js and Vue.js frameworks</li>
+                            <li>Integrated RESTful APIs and third-party services</li>
+                            <li>Ensured website accessibility compliance (WCAG 2.1 standards)</li>
+                            <li>Participated in client meetings and provided technical consultation</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="experience-item">
+                    <div class="experience-header">
+                        <div class="experience-role">Junior Web Developer</div>
+                        <div class="experience-date">2025 - 2026</div>
+                    </div>
+                    <div class="experience-company">StartUp Innovations</div>
+                    <div class="experience-description">
+                        <ul>
+                            <li>Built and maintained responsive websites using HTML, CSS, and JavaScript</li>
+                            <li>Assisted in debugging and troubleshooting frontend issues</li>
+                            <li>Learned and applied industry best practices and coding standards</li>
+                            <li>Collaborated with team members using Git version control</li>
+                            <li>Contributed to improving website performance and user experience</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Education Section -->
+            <div class="cv-section">
+                <h2 class="section-title">Education</h2>
+
+                <div class="education-item">
+                    <div class="education-degree">Bachelor of Science in Computer Science</div>
+                    <div class="education-school">University of Technology</div>
+                    <div class="education-date">2021 - 2025</div>
+                    <div class="education-description">
+                        Relevant coursework: Web Development, Data Structures, Algorithms,
+                        Database Management, Software Engineering, User Interface Design
+                    </div>
+                </div>
+            </div>
+
+            <!-- Skills Section -->
+            <div class="cv-section">
+                <h2 class="section-title">Technical Skills</h2>
+
+                <div class="skills-grid">
+                    <div class="skill-category">
+                        <div class="skill-category-title">
+                            <i class="fab fa-html5"></i>
+                            Frontend Core
+                        </div>
+                        <ul class="skill-list">
+                            <li>HTML5 & Semantic Web</li>
+                            <li>CSS3, Flexbox & Grid</li>
+                            <li>JavaScript (ES6+)</li>
+                            <li>TypeScript</li>
+                            <li>Responsive Design</li>
+                        </ul>
+                    </div>
+
+                    <div class="skill-category">
+                        <div class="skill-category-title">
+                            <i class="fab fa-react"></i>
+                            Frameworks & Libraries
+                        </div>
+                        <ul class="skill-list">
+                            <li>React.js & Next.js</li>
+                            <li>Vue.js & Nuxt.js</li>
+                            <li>Tailwind CSS</li>
+                            <li>Bootstrap 5</li>
+                            <li>jQuery</li>
+                        </ul>
+                    </div>
+
+                    <div class="skill-category">
+                        <div class="skill-category-title">
+                            <i class="fas fa-tools"></i>
+                            Tools & Workflow
+                        </div>
+                        <ul class="skill-list">
+                            <li>Git & GitHub</li>
+                            <li>Webpack & Vite</li>
+                            <li>npm & Yarn</li>
+                            <li>Figma & Adobe XD</li>
+                            <li>VS Code</li>
+                        </ul>
+                    </div>
+
+                    <div class="skill-category">
+                        <div class="skill-category-title">
+                            <i class="fas fa-code"></i>
+                            Additional Skills
+                        </div>
+                        <ul class="skill-list">
+                            <li>RESTful APIs</li>
+                            <li>Performance Optimization</li>
+                            <li>Cross-browser Testing</li>
+                            <li>Agile/Scrum</li>
+                            <li>UI/UX Principles</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Projects Section -->
+            <div class="cv-section">
+                <h2 class="section-title">Featured Projects</h2>
+
+                <div class="project-item">
+                    <div class="project-name">ELENIYAN AUTOS - Car Dealership Website</div>
+                    <div class="project-tech">
+                        <span class="tech-badge">HTML</span>
+                        <span class="tech-badge">CSS</span>
+                        <span class="tech-badge">JavaScript</span>
+                        <span class="tech-badge">React</span>
+                    </div>
+                    <div class="project-description">
+                        A modern car dealership website featuring dynamic inventory management,
+                        interactive data visualizations, and seamless user experience. Implemented
+                        responsive design ensuring optimal viewing across all devices.
+                    </div>
+                    <a href="https://shaquilleabdulmalique10-design.github.io/ELENIYAN-AUTOS/index.html"
+                        class="project-link" target="_blank">
+                        View Project <i class="fas fa-external-link-alt"></i>
+                    </a>
+                </div>
+
+                <div class="project-item">
+                    <div class="project-name">My Fishrey - Fishery Management App</div>
+                    <div class="project-tech">
+                        <span class="tech-badge">HTML</span>
+                        <span class="tech-badge">CSS</span>
+                        <span class="tech-badge">JavaScript</span>
+                    </div>
+                    <div class="project-description">
+                        A mobile-friendly fishery management application with real-time data tracking,
+                        inventory management, and user-friendly interface designed specifically for
+                        fishermen to streamline their operations.
+                    </div>
+                    <a href="https://my-fishrey.vercel.app/" class="project-link" target="_blank">
+                        View Project <i class="fas fa-external-link-alt"></i>
+                    </a>
+                </div>
+
+                <div class="project-item">
+                    <div class="project-name">Interactive Chess Game</div>
+                    <div class="project-tech">
+                        <span class="tech-badge">HTML</span>
+                        <span class="tech-badge">CSS</span>
+                        <span class="tech-badge">JavaScript</span>
+                    </div>
+                    <div class="project-description">
+                        A classic chess game with modern interface and AI opponent, featuring
+                        real-time multiplayer support and sleek design. Implemented game logic
+                        and move validation using vanilla JavaScript.
+                    </div>
+                    <a href="https://jocular-puppy-3ee365.netlify.app/" class="project-link" target="_blank">
+                        View Project <i class="fas fa-external-link-alt"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Certifications Section -->
+            <div class="cv-section">
+                <h2 class="section-title">Certifications</h2>
+
+                <div class="cert-item">
+                    <div class="cert-name">Responsive Web Design Certification</div>
+                    <div class="cert-issuer">freeCodeCamp</div>
+                    <div class="cert-date">2024</div>
+                </div>
+
+                <div class="cert-item">
+                    <div class="cert-name">JavaScript Algorithms and Data Structures</div>
+                    <div class="cert-issuer">freeCodeCamp</div>
+                    <div class="cert-date">2024</div>
+                </div>
+
+                <div class="cert-item">
+                    <div class="cert-name">Front End Development Libraries</div>
+                    <div class="cert-issuer">freeCodeCamp</div>
+                    <div class="cert-date">2025</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Print Button -->
+    <button class="print-button" onclick="window.print()">
+        <i class="fas fa-print"></i>
+        Print CV
+    </button>
+
+    <script>
+        // Add smooth scroll behavior
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+        // Console message
+        console.log('%c📄 CV of Sulaimon Abdulmalique Shaquille', 'font-size: 16px; font-weight: bold; color: #667eea;');
+        console.log('%c👨‍💻 Front End Developer', 'font-size: 14px; color: #764ba2;');
+    </script>
+</body>
+
+</html>
